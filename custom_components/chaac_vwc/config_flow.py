@@ -95,33 +95,33 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             vol.Required(CONF_DEVICE_EUI): str,
             vol.Optional(CONF_POLL_SECONDS, default=DEFAULT_POLL_SECONDS): vol.Coerce(int),
             vol.Optional(CONF_KEEP_DAYS, default=DEFAULT_KEEP_DAYS): vol.Coerce(int),
-# Optional Shelly + watering logic (can also be changed later in Options)
-vol.Optional(CONF_PLUG_ENABLED, default=False): bool,
-vol.Optional(CONF_PLUG_HOST, default=""): str,
-vol.Optional(CONF_PLUG_ID, default=0): vol.Coerce(int),
+            # Optional Shelly + watering logic (can also be changed later in Options)
+            vol.Optional(CONF_PLUG_ENABLED, default=False): bool,
+            vol.Optional(CONF_PLUG_HOST, default=""): str,
+            vol.Optional(CONF_PLUG_ID, default=0): vol.Coerce(int),
             vol.Optional(CONF_PLUG_USER, default=""): str,
             vol.Optional(CONF_PLUG_PASS, default=""): str,
 
-vol.Optional(CONF_THRESHOLD_P1, default=DEFAULT_THRESHOLD): vol.Coerce(float),
-vol.Optional(CONF_THRESHOLD_P2, default=DEFAULT_THRESHOLD): vol.Coerce(float),
+            vol.Optional(CONF_THRESHOLD_P1, default=DEFAULT_THRESHOLD): vol.Coerce(float),
+            vol.Optional(CONF_THRESHOLD_P2, default=DEFAULT_THRESHOLD): vol.Coerce(float),
 
             vol.Optional(CONF_ML_PER_SEC, default=DEFAULT_ML_PER_SEC): vol.Coerce(float),
             vol.Optional(CONF_USE_SECONDS, default=False): bool,
             vol.Optional(CONF_PUMP_ML, default=DEFAULT_PUMP_ML): vol.Coerce(float),
             vol.Optional(CONF_PUMP_SECONDS, default=DEFAULT_PUMP_SECONDS): vol.Coerce(int),
 
-vol.Optional(CONF_PLANT_INTERVAL_MIN, default=DEFAULT_PLANT_INTERVAL_MIN): vol.Coerce(int),
-vol.Optional(CONF_CHECK_ONLY_IN_PLANT_TIMES, default=True): bool,
+            vol.Optional(CONF_PLANT_INTERVAL_MIN, default=DEFAULT_PLANT_INTERVAL_MIN): vol.Coerce(int),
+            vol.Optional(CONF_CHECK_ONLY_IN_PLANT_TIMES, default=True): bool,
 
-vol.Optional(CONF_P1_START_H, default=0): vol.Coerce(int),
-vol.Optional(CONF_P1_START_M, default=0): vol.Coerce(int),
-vol.Optional(CONF_P1_END_H, default=0): vol.Coerce(int),
-vol.Optional(CONF_P1_END_M, default=0): vol.Coerce(int),
+            vol.Optional(CONF_P1_START_H, default=0): vol.Coerce(int),
+            vol.Optional(CONF_P1_START_M, default=0): vol.Coerce(int),
+            vol.Optional(CONF_P1_END_H, default=0): vol.Coerce(int),
+            vol.Optional(CONF_P1_END_M, default=0): vol.Coerce(int),
 
-vol.Optional(CONF_P2_START_H, default=0): vol.Coerce(int),
-vol.Optional(CONF_P2_START_M, default=0): vol.Coerce(int),
-vol.Optional(CONF_P2_END_H, default=0): vol.Coerce(int),
-vol.Optional(CONF_P2_END_M, default=0): vol.Coerce(int),
+            vol.Optional(CONF_P2_START_H, default=0): vol.Coerce(int),
+            vol.Optional(CONF_P2_START_M, default=0): vol.Coerce(int),
+            vol.Optional(CONF_P2_END_H, default=0): vol.Coerce(int),
+            vol.Optional(CONF_P2_END_M, default=0): vol.Coerce(int),
         })
         return self.async_show_form(step_id="user", data_schema=schema, errors=errors)
 
