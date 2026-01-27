@@ -34,7 +34,7 @@ def _clamp_float(v, lo, hi, d):
     return max(lo, min(hi, x))
 
 
-class ChaacSenseCapFlow(config_entries.ConfigFlow, domain=DOMAIN):
+class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     VERSION = 4
 
     async def async_step_user(self, user_input=None):

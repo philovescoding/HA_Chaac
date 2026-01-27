@@ -1,9 +1,9 @@
 {
   "domain": "chaac_vwc",
   "name": "Chaac VWC (SenseCAP + Shelly)",
-  "version": "4.6.0",
-  "documentation": "https://github.com/<your-github-user>/chaac_vwc",
-  "issue_tracker": "https://github.com/<your-github-user>/chaac_vwc/issues",
+  "version": "4.6.1",
+  "documentation": "https://github.com/philovescoding/chaac_vwc",
+  "issue_tracker": "https://github.com/philovescoding/chaac_vwc/issues",
   "requirements": [],
   "codeowners": [],
   "config_flow": true,
