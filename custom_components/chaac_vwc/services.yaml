@@ -1,0 +1,22 @@
+pump:
+  name: Pump now
+  description: Manually water (Shelly on, then auto-off). Gen2 first, Gen1 fallback.
+  fields:
+    seconds:
+      name: Seconds
+      description: Optional pump ON time in seconds (overrides ml).
+      required: false
+      selector:
+        number:
+          min: 0
+          max: 3600
+          mode: box
+    ml:
+      name: Milliliters
+      description: Optional water amount in ml (converted using mlPerSec).
+      required: false
+      selector:
+        number:
+          min: 0
+          max: 100000
+          mode: box

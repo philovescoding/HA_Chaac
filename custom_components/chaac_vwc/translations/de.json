@@ -1,0 +1,82 @@
+{
+  "config": {
+    "error": {
+      "missing_creds": "Access ID/Key fehlen.",
+      "missing_eui": "Device EUI fehlt."
+    },
+    "step": {
+      "user": {
+        "title": "Feeder SenseCAP (Single Slot)",
+        "description": "Nur 1 Slot: Access ID/Key + Device EUI eintragen. Rest über Optionen.",
+        "data": {
+          "enabled": "Aktiv",
+          "station": "Station",
+          "accessId": "Access ID",
+          "accessKey": "Access Key",
+          "deviceEui": "Device EUI",
+          "pollSeconds": "Poll (Sekunden)",
+          "keepDays": "Logs behalten (Tage)",
+          "plugEnabled": "Shelly aktiv",
+          "plugHost": "Shelly Host/IP (z.B. 192.168.1.50)",
+          "plugId": "Shelly Relay-ID (meist 0)",
+          "thresholdP1": "Feuchte-Schwelle P1 (%)",
+          "thresholdP2": "Feuchte-Schwelle P2 (%)",
+          "plantIntervalMinutes": "Min. Abstand zwischen Pumpen (Min)",
+          "checkOnlyInPlantTimes": "Nur in P1/P2 Zeiten prüfen",
+          "p1StartHour": "P1 Start (Stunde)",
+          "p1StartMinute": "P1 Start (Minute)",
+          "p1EndHour": "P1 Ende (Stunde)",
+          "p1EndMinute": "P1 Ende (Minute)",
+          "p2StartHour": "P2 Start (Stunde)",
+          "p2StartMinute": "P2 Start (Minute)",
+          "p2EndHour": "P2 Ende (Stunde)",
+          "p2EndMinute": "P2 Ende (Minute)",
+          "plugUser": "Shelly Benutzername (optional)",
+          "plugPass": "Shelly Passwort (optional)",
+          "mlPerSec": "ml pro Sekunde (Kalibrierung)",
+          "useSeconds": "Pumpdauer statt ml verwenden",
+          "pumpMl": "Pumpmenge pro Schaltvorgang (ml)",
+          "pumpSeconds": "Pumpdauer pro Schaltvorgang (Sek.)"
+        }
+      }
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "enabled": "Aktiv",
+          "station": "Station",
+          "accessId": "Access ID",
+          "accessKey": "Access Key",
+          "deviceEui": "Device EUI",
+          "pollSeconds": "Poll (Sekunden)",
+          "keepDays": "Logs behalten (Tage)",
+          "plugEnabled": "Shelly aktiv",
+          "plugHost": "Shelly Host/IP (z.B. 192.168.1.50)",
+          "plugId": "Shelly Relay-ID (meist 0)",
+          "thresholdP1": "Feuchte-Schwelle P1 (%)",
+          "thresholdP2": "Feuchte-Schwelle P2 (%)",
+          "plantIntervalMinutes": "Min. Abstand zwischen Pumpen (Min)",
+          "checkOnlyInPlantTimes": "Nur in P1/P2 Zeiten prüfen",
+          "p1StartHour": "P1 Start (Stunde)",
+          "p1StartMinute": "P1 Start (Minute)",
+          "p1EndHour": "P1 Ende (Stunde)",
+          "p1EndMinute": "P1 Ende (Minute)",
+          "p2StartHour": "P2 Start (Stunde)",
+          "p2StartMinute": "P2 Start (Minute)",
+          "p2EndHour": "P2 Ende (Stunde)",
+          "p2EndMinute": "P2 Ende (Minute)",
+          "channelIndex": "Channel Index (1..8)",
+          "mlPerSec": "ml pro Sekunde (Kalibrierung)",
+          "useSeconds": "Pumpdauer statt ml verwenden",
+          "pumpMl": "Pumpmenge pro Schaltvorgang (ml)",
+          "pumpSeconds": "Pumpdauer pro Schaltvorgang (Sek.)",
+          "plugUser": "Shelly Benutzername (optional)",
+          "plugPass": "Shelly Passwort (optional)"
+        }
+      }
+    }
+  },
+  "title": "Chaac VWC"
+}

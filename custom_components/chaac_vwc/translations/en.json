@@ -1,0 +1,82 @@
+{
+  "config": {
+    "error": {
+      "missing_creds": "Access ID/Key missing.",
+      "missing_eui": "Device EUI missing."
+    },
+    "step": {
+      "user": {
+        "title": "Feeder SenseCAP (Single Slot)",
+        "description": "Single slot: enter Access ID/Key + Device EUI. Everything else via Options.",
+        "data": {
+          "enabled": "Enabled",
+          "station": "Station",
+          "accessId": "Access ID",
+          "accessKey": "Access Key",
+          "deviceEui": "Device EUI",
+          "pollSeconds": "Poll (seconds)",
+          "keepDays": "Keep logs (days)",
+          "plugEnabled": "Enable Shelly",
+          "plugHost": "Shelly Host/IP (e.g. 192.168.1.50)",
+          "plugId": "Shelly relay id (usually 0)",
+          "thresholdP1": "Moisture threshold P1 (%)",
+          "thresholdP2": "Moisture threshold P2 (%)",
+          "plantIntervalMinutes": "Min interval between watering (min)",
+          "checkOnlyInPlantTimes": "Only check in P1/P2 windows",
+          "p1StartHour": "P1 start hour",
+          "p1StartMinute": "P1 start minute",
+          "p1EndHour": "P1 end hour",
+          "p1EndMinute": "P1 end minute",
+          "p2StartHour": "P2 start hour",
+          "p2StartMinute": "P2 start minute",
+          "p2EndHour": "P2 end hour",
+          "p2EndMinute": "P2 end minute",
+          "plugUser": "Shelly username (optional)",
+          "plugPass": "Shelly password (optional)",
+          "mlPerSec": "ml per second (calibration)",
+          "useSeconds": "Use pump seconds instead of ml",
+          "pumpMl": "Pump amount per watering (ml)",
+          "pumpSeconds": "Pump seconds per watering"
+        }
+      }
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "enabled": "Enabled",
+          "station": "Station",
+          "accessId": "Access ID",
+          "accessKey": "Access Key",
+          "deviceEui": "Device EUI",
+          "pollSeconds": "Poll (seconds)",
+          "keepDays": "Keep logs (days)",
+          "plugEnabled": "Enable Shelly",
+          "plugHost": "Shelly Host/IP (e.g. 192.168.1.50)",
+          "plugId": "Shelly relay id (usually 0)",
+          "thresholdP1": "Moisture threshold P1 (%)",
+          "thresholdP2": "Moisture threshold P2 (%)",
+          "plantIntervalMinutes": "Min interval between watering (min)",
+          "checkOnlyInPlantTimes": "Only check in P1/P2 windows",
+          "p1StartHour": "P1 start hour",
+          "p1StartMinute": "P1 start minute",
+          "p1EndHour": "P1 end hour",
+          "p1EndMinute": "P1 end minute",
+          "p2StartHour": "P2 start hour",
+          "p2StartMinute": "P2 start minute",
+          "p2EndHour": "P2 end hour",
+          "p2EndMinute": "P2 end minute",
+          "channelIndex": "Channel index (1..8)",
+          "mlPerSec": "ml per second (calibration)",
+          "useSeconds": "Use pump seconds instead of ml",
+          "pumpMl": "Pump amount per watering (ml)",
+          "pumpSeconds": "Pump seconds per watering",
+          "plugUser": "Shelly username (optional)",
+          "plugPass": "Shelly password (optional)"
+        }
+      }
+    }
+  },
+  "title": "Chaac VWC"
+}
