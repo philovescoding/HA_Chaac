@@ -30,3 +30,6 @@ You will be asked for:
 - Shelly Host/IP (optional) + relay id
 - Thresholds + P1/P2 times
 - Pump amount: ml/sec calibration OR fixed seconds
+
+
+- Fix: Config flow handler for sensor source selection (v4.7.1)
