@@ -4,52 +4,64 @@ import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.core import callback
 
-from .const import (
-    DOMAIN,
-    default_cfg,
-    CONF_ENABLED,
-    CONF_STATION,
-    CONF_ACCESS_ID,
-    CONF_ACCESS_KEY,
-    CONF_POLL_SECONDS,
-    CONF_KEEP_DAYS,
-    CONF_DEVICE_EUI,
-    CONF_CHANNEL_INDEX,
-    CONF_PLUG_ENABLED,
-    CONF_PLUG_HOST,
-    CONF_PLUG_ID,
-    CONF_PLUG_USER,
-    CONF_PLUG_PASS,
-    CONF_THRESHOLD_P1,
-    CONF_THRESHOLD_P2,
-    CONF_ML_PER_SEC,
-    CONF_USE_SECONDS,
-    CONF_PUMP_ML,
-    CONF_PUMP_SECONDS,
-    CONF_PLANT_INTERVAL_MIN,
-    CONF_CHECK_ONLY_IN_PLANT_TIMES,
-    CONF_P1_START_H,
-    CONF_P1_START_M,
-    CONF_P1_END_H,
-    CONF_P1_END_M,
-    CONF_P2_START_H,
-    CONF_P2_START_M,
-    CONF_P2_END_H,
-    CONF_P2_END_M,
-    CONF_SENSOR_SOURCE,
-    CONF_MOIST_ENTITY,
-    CONF_TEMP_ENTITY,
-    CONF_EC_ENTITY,
-    DEFAULT_STATION,
-    DEFAULT_POLL_SECONDS,
-    DEFAULT_KEEP_DAYS,
-    DEFAULT_CHANNEL_INDEX,
-    DEFAULT_THRESHOLD,
-    DEFAULT_ML_PER_SEC,
-    DEFAULT_PUMP_ML,
-    DEFAULT_PUMP_SECONDS,
-    DEFAULT_PLANT_INTERVAL_MIN,
-)
+try:
+    from .const import DOMAIN, default_cfg
+except Exception:
+    DOMAIN = "chaac_vwc"
+    def default_cfg() -> dict:
+        return {}
+
+# Config keys (match const.py)
+CONF_SENSOR_SOURCE = "sensorSource"
+CONF_MOIST_ENTITY  = "moistEntity"
+CONF_TEMP_ENTITY   = "tempEntity"
+CONF_EC_ENTITY     = "ecEntity"
+
+CONF_ENABLED        = "enabled"
+CONF_STATION        = "station"
+CONF_ACCESS_ID      = "accessId"
+CONF_ACCESS_KEY     = "accessKey"
+CONF_DEVICE_EUI     = "deviceEui"
+CONF_POLL_SECONDS   = "pollSeconds"
+CONF_KEEP_DAYS      = "keepDays"
+CONF_CHANNEL_INDEX  = "channelIndex"
+
+CONF_PLUG_ENABLED   = "plugEnabled"
+CONF_PLUG_HOST      = "plugHost"
+CONF_PLUG_ID        = "plugId"
+CONF_PLUG_USER      = "plugUser"
+CONF_PLUG_PASS      = "plugPass"
+
+CONF_THRESHOLD_P1   = "thresholdP1"
+CONF_THRESHOLD_P2   = "thresholdP2"
+
+CONF_ML_PER_SEC     = "mlPerSec"
+CONF_USE_SECONDS    = "useSeconds"
+CONF_PUMP_ML        = "pumpMl"
+CONF_PUMP_SECONDS   = "pumpSeconds"
+
+CONF_PLANT_INTERVAL_MIN       = "plantIntervalMinutes"
+CONF_CHECK_ONLY_IN_PLANT_TIMES = "checkOnlyInPlantTimes"
+
+CONF_P1_START_H = "p1StartHour"
+CONF_P1_START_M = "p1StartMinute"
+CONF_P1_END_H   = "p1EndHour"
+CONF_P1_END_M   = "p1EndMinute"
+CONF_P2_START_H = "p2StartHour"
+CONF_P2_START_M = "p2StartMinute"
+CONF_P2_END_H   = "p2EndHour"
+CONF_P2_END_M   = "p2EndMinute"
+
+# Defaults (match const.py)
+DEFAULT_STATION = "global"
+DEFAULT_POLL_SECONDS = 60
+DEFAULT_KEEP_DAYS = 2
+DEFAULT_CHANNEL_INDEX = 1
+DEFAULT_THRESHOLD = 35.0
+DEFAULT_ML_PER_SEC = 50.0
+DEFAULT_PUMP_ML = 200.0
+DEFAULT_PUMP_SECONDS = 5
+DEFAULT_PLANT_INTERVAL_MIN = 5
 
 
 def _clamp_int(v, lo, hi, d):
@@ -61,7 +73,7 @@ def _clamp_int(v, lo, hi, d):
 
 
 class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
-    VERSION = 5
+    VERSION = 6
 
     async def async_step_user(self, user_input=None):
         if user_input is not None:
@@ -86,12 +98,13 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             access_id = str(user_input.get(CONF_ACCESS_ID, "")).strip()
             access_key = str(user_input.get(CONF_ACCESS_KEY, "")).strip()
             device_eui = str(user_input.get(CONF_DEVICE_EUI, "")).strip()
+
             if not access_id or not access_key:
                 errors["base"] = "missing_creds"
             elif not device_eui:
                 errors["base"] = "missing_eui"
             else:
-                station = user_input.get(CONF_STATION, DEFAULT_STATION)
+                station = str(user_input.get(CONF_STATION, DEFAULT_STATION))
                 await self.async_set_unique_id(f"{DOMAIN}:{station}:{access_id[:8]}:{device_eui[-6:]}")
                 self._abort_if_unique_id_configured()
 
@@ -187,7 +200,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 cfg = self._cfg if hasattr(self, "_cfg") else default_cfg()
                 cfg.update({
                     CONF_ENABLED: True,
-                    CONF_STATION: "global",
+                    CONF_STATION: DEFAULT_STATION,
                     CONF_ACCESS_ID: "",
                     CONF_ACCESS_KEY: "",
                     CONF_DEVICE_EUI: "",
@@ -266,10 +279,10 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     @staticmethod
     @callback
     def async_get_options_flow(config_entry):
-        return ChaacSenseCapOptionsFlow(config_entry)
+        return ChaacVwcOptionsFlow(config_entry)
 
 
-class ChaacSenseCapOptionsFlow(config_entries.OptionsFlow):
+class ChaacVwcOptionsFlow(config_entries.OptionsFlow):
     def __init__(self, config_entry):
         self.config_entry = config_entry
 
