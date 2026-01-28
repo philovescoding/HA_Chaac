@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from datetime import timedelta
-
 import logging
 
 from homeassistant.config_entries import ConfigEntry
@@ -30,6 +29,18 @@ async def _async_update_listener(hass: HomeAssistant, entry: ConfigEntry) -> Non
     await hass.config_entries.async_reload(entry.entry_id)
 
 
+def _to_float_from_state(state_obj):
+    try:
+        if state_obj is None:
+            return None
+        s = state_obj.state
+        if s in (None, "", "unknown", "unavailable"):
+            return None
+        return float(s)
+    except Exception:
+        return None
+
+
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     session = async_get_clientsession(hass)
     d = entry.data
@@ -40,9 +51,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     controller = SenseCapVwcControllerSingle(
         hass=hass,
         session=session,
-        station=str(d.get(CONF_STATION, 'global')),
-        access_id=str(d.get(CONF_ACCESS_ID, '')),
-        access_key=str(d.get(CONF_ACCESS_KEY, '')),
+        station=str(d.get(CONF_STATION, "global")),
+        access_id=str(d.get(CONF_ACCESS_ID, "")),
+        access_key=str(d.get(CONF_ACCESS_KEY, "")),
         poll_seconds=int(d.get(CONF_POLL_SECONDS, 60)),
         keep_days=int(d.get(CONF_KEEP_DAYS, 2)),
         enabled=bool(d.get(CONF_ENABLED, True)),
@@ -50,44 +61,31 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         persisted_state=store.state,
     )
 
+    # If configured to use HA entity as sensor source: listen to changes and run decision immediately.
+    controller._unsub_state_listener = None  # type: ignore[attr-defined]
+    if str(d.get(CONF_SENSOR_SOURCE, "sensecap_cloud")) == "ha_entity":
+        moist_ent = str(d.get(CONF_MOIST_ENTITY, "")).strip()
+        temp_ent = str(d.get(CONF_TEMP_ENTITY, "")).strip()
+        ec_ent = str(d.get(CONF_EC_ENTITY, "")).strip()
 
-# If configured to use HA entity as sensor source: listen to changes and run decision immediately.
-controller._unsub_state_listener = None  # type: ignore[attr-defined]
-if str(d.get(CONF_SENSOR_SOURCE, "sensecap_cloud")) == "ha_entity":
-    moist_ent = str(d.get(CONF_MOIST_ENTITY, "")).strip()
-    temp_ent = str(d.get(CONF_TEMP_ENTITY, "")).strip()
-    ec_ent = str(d.get(CONF_EC_ENTITY, "")).strip()
+        @callback
+        def _handle(event):
+            if event.data.get("entity_id") != moist_ent:
+                return
+            vwc = _to_float_from_state(event.data.get("new_state"))
+            if vwc is None:
+                return
+            t = _to_float_from_state(hass.states.get(temp_ent)) if temp_ent else None
+            ec = _to_float_from_state(hass.states.get(ec_ent)) if ec_ent else None
+            sample = {"t": int(hass.loop.time() * 1000), "moist": vwc}
+            if t is not None:
+                sample["temp"] = t
+            if ec is not None:
+                sample["ec"] = ec
+            hass.async_create_task(controller.on_external_sample(sample))
 
-    def _to_float(state_obj):
-        try:
-            if state_obj is None:
-                return None
-            s = state_obj.state
-            if s in (None, "", "unknown", "unavailable"):
-                return None
-            return float(s)
-        except Exception:
-            return None
-
-    @callback
-    def _handle(event):
-        if event.data.get("entity_id") != moist_ent:
-            return
-        vwc = _to_float(event.data.get("new_state"))
-        if vwc is None:
-            return
-        t = _to_float(hass.states.get(temp_ent)) if temp_ent else None
-        ec = _to_float(hass.states.get(ec_ent)) if ec_ent else None
-        sample = {"t": int(hass.loop.time() * 1000), "moist": vwc}
-        if t is not None:
-            sample["temp"] = t
-        if ec is not None:
-            sample["ec"] = ec
-        hass.async_create_task(controller.on_external_sample(sample))
-
-    if moist_ent:
-        controller._unsub_state_listener = async_track_state_change_event(hass, [moist_ent], _handle)
-
+        if moist_ent:
+            controller._unsub_state_listener = async_track_state_change_event(hass, [moist_ent], _handle)
 
     async def _async_update():
         try:
@@ -99,7 +97,7 @@ if str(d.get(CONF_SENSOR_SOURCE, "sensecap_cloud")) == "ha_entity":
 
     coordinator = DataUpdateCoordinator(
         hass,
-        logger=__import__("logging").getLogger(__name__),
+        logger=logging.getLogger(__name__),
         name=f"{DOMAIN}_{entry.entry_id}",
         update_method=_async_update,
         update_interval=timedelta(seconds=max(10, int(d.get(CONF_POLL_SECONDS, 60) or 60))),
@@ -148,6 +146,7 @@ if str(d.get(CONF_SENSOR_SOURCE, "sensecap_cloud")) == "ha_entity":
         else:
             LOGGER.debug("Manual pump: switch ON failed host=%s id=%s", host, plug_id)
 
+    # Register service (idempotent: overwrites same name)
     hass.services.async_register(DOMAIN, "pump", _svc_pump)
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
@@ -155,6 +154,13 @@ if str(d.get(CONF_SENSOR_SOURCE, "sensecap_cloud")) == "ha_entity":
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
+    data = hass.data.get(DOMAIN, {}).get(entry.entry_id)
+    if data and getattr(data.get("controller"), "_unsub_state_listener", None):
+        try:
+            data["controller"]._unsub_state_listener()  # type: ignore[attr-defined]
+        except Exception:
+            pass
+
     unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
     if unload_ok:
         hass.data[DOMAIN].pop(entry.entry_id, None)
