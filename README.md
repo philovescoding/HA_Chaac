@@ -33,3 +33,6 @@ You will be asked for:
 
 
 - Fix: Config flow handler for sensor source selection (v4.7.1)
+
+
+- 4.7.3: remove __pycache__ from package (clean HACS install)
