@@ -18,6 +18,11 @@ CONF_PLUG_ID = "plugId"
 CONF_PLUG_USER = "plugUser"
 CONF_PLUG_PASS = "plugPass"
 
+CONF_SENSOR_SOURCE = "sensorSource"
+CONF_MOIST_ENTITY = "moistEntity"
+CONF_TEMP_ENTITY = "tempEntity"
+CONF_EC_ENTITY = "ecEntity"
+
 CONF_THRESHOLD_P1 = "thresholdP1"
 CONF_THRESHOLD_P2 = "thresholdP2"
 
@@ -74,6 +79,10 @@ def default_cfg() -> dict:
         CONF_ACCESS_ID: "",
         CONF_ACCESS_KEY: "",
         CONF_POLL_SECONDS: DEFAULT_POLL_SECONDS,
+        CONF_SENSOR_SOURCE: "sensecap_cloud",
+        CONF_MOIST_ENTITY: "",
+        CONF_TEMP_ENTITY: "",
+        CONF_EC_ENTITY: "",
         CONF_KEEP_DAYS: DEFAULT_KEEP_DAYS,
 
         CONF_DEVICE_EUI: "",

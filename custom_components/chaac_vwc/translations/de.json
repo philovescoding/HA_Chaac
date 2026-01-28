@@ -36,7 +36,11 @@
           "mlPerSec": "ml pro Sekunde (Kalibrierung)",
           "useSeconds": "Pumpdauer statt ml verwenden",
           "pumpMl": "Pumpmenge pro Schaltvorgang (ml)",
-          "pumpSeconds": "Pumpdauer pro Schaltvorgang (Sek.)"
+          "pumpSeconds": "Pumpdauer pro Schaltvorgang (Sek.)",
+          "sensorSource": "Sensorquelle",
+          "moistEntity": "VWC/Feuchte Sensor (z.B. S1 Watercontent)",
+          "tempEntity": "Temperatur Sensor (optional)",
+          "ecEntity": "EC Sensor (optional)"
         }
       }
     }

@@ -5,14 +5,16 @@ from datetime import timedelta
 import logging
 
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.core import HomeAssistant, ServiceCall
+from homeassistant.core import HomeAssistant, ServiceCall, callback
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
+from homeassistant.helpers.event import async_track_state_change_event
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
 from .const import (
     DOMAIN,
     CONF_ENABLED, CONF_STATION, CONF_ACCESS_ID, CONF_ACCESS_KEY,
     CONF_POLL_SECONDS, CONF_KEEP_DAYS,
+    CONF_SENSOR_SOURCE, CONF_MOIST_ENTITY, CONF_TEMP_ENTITY, CONF_EC_ENTITY,
     CONF_PLUG_ENABLED, CONF_PLUG_HOST, CONF_PLUG_ID, CONF_PLUG_USER, CONF_PLUG_PASS,
     CONF_ML_PER_SEC, CONF_PUMP_SECONDS,
 )
@@ -38,15 +40,54 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     controller = SenseCapVwcControllerSingle(
         hass=hass,
         session=session,
-        station=d[CONF_STATION],
-        access_id=d[CONF_ACCESS_ID],
-        access_key=d[CONF_ACCESS_KEY],
+        station=str(d.get(CONF_STATION, 'global')),
+        access_id=str(d.get(CONF_ACCESS_ID, '')),
+        access_key=str(d.get(CONF_ACCESS_KEY, '')),
         poll_seconds=int(d.get(CONF_POLL_SECONDS, 60)),
         keep_days=int(d.get(CONF_KEEP_DAYS, 2)),
         enabled=bool(d.get(CONF_ENABLED, True)),
         cfg=d,
         persisted_state=store.state,
     )
+
+
+# If configured to use HA entity as sensor source: listen to changes and run decision immediately.
+controller._unsub_state_listener = None  # type: ignore[attr-defined]
+if str(d.get(CONF_SENSOR_SOURCE, "sensecap_cloud")) == "ha_entity":
+    moist_ent = str(d.get(CONF_MOIST_ENTITY, "")).strip()
+    temp_ent = str(d.get(CONF_TEMP_ENTITY, "")).strip()
+    ec_ent = str(d.get(CONF_EC_ENTITY, "")).strip()
+
+    def _to_float(state_obj):
+        try:
+            if state_obj is None:
+                return None
+            s = state_obj.state
+            if s in (None, "", "unknown", "unavailable"):
+                return None
+            return float(s)
+        except Exception:
+            return None
+
+    @callback
+    def _handle(event):
+        if event.data.get("entity_id") != moist_ent:
+            return
+        vwc = _to_float(event.data.get("new_state"))
+        if vwc is None:
+            return
+        t = _to_float(hass.states.get(temp_ent)) if temp_ent else None
+        ec = _to_float(hass.states.get(ec_ent)) if ec_ent else None
+        sample = {"t": int(hass.loop.time() * 1000), "moist": vwc}
+        if t is not None:
+            sample["temp"] = t
+        if ec is not None:
+            sample["ec"] = ec
+        hass.async_create_task(controller.on_external_sample(sample))
+
+    if moist_ent:
+        controller._unsub_state_listener = async_track_state_change_event(hass, [moist_ent], _handle)
+
 
     async def _async_update():
         try:

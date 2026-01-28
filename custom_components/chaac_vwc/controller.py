@@ -375,7 +375,12 @@ class SenseCapVwcControllerSingle:
     ) -> None:
         self.hass = hass
         self.session = session
-        self.client = SenseCapCloudClient(session=session, station=station, access_id=access_id, access_key=access_key)
+        self.station = station
+        self.sensor_source = str(cfg.get('sensorSource', 'sensecap_cloud'))
+        self.client = None
+        if self.sensor_source != 'ha_entity':
+            self.client = SenseCapCloudClient(session=session, station=station, access_id=access_id, access_key=access_key)
+
         self.poll_seconds = max(10, int(poll_seconds))
         self.enabled = bool(enabled)
         self.cfg = cfg
@@ -478,14 +483,46 @@ class SenseCapVwcControllerSingle:
         self.persisted_state.last_pump_ts_ms = now_ms
         return True
 
+
+async def on_external_sample(self, sample: dict[str, Any]) -> None:
+    """Accept external sample (e.g. from HA entity) and run decision."""
+    try:
+        self.persisted_state.last_sample = dict(sample)
+    except Exception:
+        pass
+    try:
+        await self.sample_logger.async_append(sample)
+    except Exception:
+        pass
+    try:
+        await self._pump_auto_if_needed(sample)
+    except Exception:
+        pass
+    try:
+        await self._update_totals_if_dirty()
+    except Exception:
+        pass
+
     async def poll_once(self) -> dict[str, Any]:
         cfg = self.cfg
+
+        # HA entity mode: no cloud fetch, just return last sample + totals
+        if getattr(self, 'sensor_source', 'sensecap_cloud') == 'ha_entity':
+            await self._update_totals_if_dirty()
+            last = dict(getattr(self.persisted_state, 'last_sample', {}) or {})
+            return {
+                'enabled': True,
+                'station': 'ha_entity',
+                'pollSeconds': self.poll_seconds,
+                'epoch': int(dt_util.utcnow().timestamp()),
+                'slot': {'status': 'ok', 'last': last, 'pumpTotals': self.pump_totals},
+            }
 
         if not self.enabled:
             await self._update_totals_if_dirty()
             return {
                 "enabled": False,
-                "station": self.client.station,
+                "station": (self.client.station if self.client else getattr(self, "station", "")),
                 "pollSeconds": self.poll_seconds,
                 "epoch": int(dt_util.utcnow().timestamp()),
                 "slot": {"status": "disabled", "last": {}, "pumpTotals": self.pump_totals},
@@ -496,7 +533,7 @@ class SenseCapVwcControllerSingle:
             await self._update_totals_if_dirty()
             return {
                 "enabled": True,
-                "station": self.client.station,
+                "station": (self.client.station if self.client else getattr(self, "station", "")),
                 "pollSeconds": self.poll_seconds,
                 "epoch": int(dt_util.utcnow().timestamp()),
                 "slot": {"status": "missing deviceEui", "last": {}, "pumpTotals": self.pump_totals},
@@ -517,7 +554,7 @@ class SenseCapVwcControllerSingle:
             await self._update_totals_if_dirty()
             return {
                 "enabled": True,
-                "station": self.client.station,
+                "station": (self.client.station if self.client else getattr(self, "station", "")),
                 "pollSeconds": self.poll_seconds,
                 "epoch": int(dt_util.utcnow().timestamp()),
                 "slot": {"status": err, "last": {}, "pumpTotals": self.pump_totals},
@@ -548,7 +585,7 @@ class SenseCapVwcControllerSingle:
 
         return {
             "enabled": True,
-            "station": self.client.station,
+            "station": (self.client.station if self.client else getattr(self, "station", "")),
             "pollSeconds": self.poll_seconds,
             "epoch": int(dt_util.utcnow().timestamp()),
             "slot": {"status": "ok", "last": last, "pumpTotals": self.pump_totals},

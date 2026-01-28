@@ -36,7 +36,11 @@
           "mlPerSec": "ml per second (calibration)",
           "useSeconds": "Use pump seconds instead of ml",
           "pumpMl": "Pump amount per watering (ml)",
-          "pumpSeconds": "Pump seconds per watering"
+          "pumpSeconds": "Pump seconds per watering",
+          "sensorSource": "Sensor source",
+          "moistEntity": "VWC/Moisture sensor (e.g. S1 Watercontent)",
+          "tempEntity": "Temperature sensor (optional)",
+          "ecEntity": "EC sensor (optional)"
         }
       }
     }
