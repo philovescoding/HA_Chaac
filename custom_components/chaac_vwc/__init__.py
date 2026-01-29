@@ -89,7 +89,17 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     async def _async_update():
         try:
-            data = await controller.poll_once()
+            # Some older installs had a controller without poll_once (bad cache/mix).
+            if hasattr(controller, "poll_once"):
+                data = await controller.poll_once()
+            else:
+                # fallback: return last known state if no poll_once exists
+                data = {
+                    "enabled": bool(d.get(CONF_ENABLED, True)),
+                    "station": str(d.get(CONF_STATION, "")),
+                    "pollSeconds": int(d.get(CONF_POLL_SECONDS, 60)),
+                    "last": dict(getattr(store.state, "last_sample", {}) or {}),
+                }
             await store.async_save()
             return data
         except Exception as e:
@@ -142,11 +152,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         if ok:
             LOGGER.debug("Manual pump: switched ON ok host=%s id=%s seconds=%s", host, plug_id, seconds)
             await controller.schedule_off(host, plug_id, seconds)
-            controller._totals_dirty = True  # pylint: disable=protected-access
+            controller._totals_dirty = True  # type: ignore[attr-defined]
         else:
             LOGGER.debug("Manual pump: switch ON failed host=%s id=%s", host, plug_id)
 
-    # Register service (idempotent: overwrites same name)
     hass.services.async_register(DOMAIN, "pump", _svc_pump)
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
